@@ -29,11 +29,16 @@ class ofApp : public ofBaseApp{
   ofSpherePrimitive sphere;
   ofEasyCam cam;
   ofShader shader;
+
   ofxVec3Slider lightPos;
-  ofxFloatSlider specularStrength;
-  ofxFloatSlider ambientLightStrength;
-  ofxIntSlider  shininess;
-  ofxColorSlider lightColor;
-  ofxColorSlider cubeColor;
+  ofxColorSlider lightAmbientColor;
+  ofxColorSlider lightDiffuseColor;
+  ofxFloatSlider  lightSpecular;
+  
+  ofxColorSlider materialAmbientColor;
+  ofxColorSlider materialDiffuseColor;
+  ofxIntSlider  materialShininess;
+  ofxFloatSlider materialSpecular;
+  
   ofxPanel gui;
 };
