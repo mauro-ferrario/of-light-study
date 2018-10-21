@@ -14,10 +14,19 @@ struct Light {
   vec3 specular;
 };
 
+struct TextureMaterial {
+  sampler2D diffuse;
+  vec3      specular;
+  float     shininess;
+};
+
+in vec2 TexCoords;
+
 uniform Light light;
 uniform Material material;
+uniform TextureMaterial textMaterial;
 
-
+uniform sampler2D diffuseText;
 
 uniform mat4 modelViewMatrix;
 uniform mat4 modelMatrix;
@@ -32,23 +41,33 @@ in vec3 Normal;
 in vec3 FragPos;
 out vec4 fragColor;
 
+bool useTexMaterial = true;
+
 
 void main (void) {
-  // ambient
-  vec3 ambient = light.ambient * material.ambient;
-  
-  // diffuse
   vec3 norm = normalize(Normal.xyz);
   vec3 lightDir = normalize(light.position - FragPos);
   float diff = max(dot(norm, lightDir), 0.0);
-  vec3 diffuse = light.diffuse * (diff * material.diffuse);
-  
-  // specular
   vec3 viewDir = normalize(viewPos - FragPos);
   vec3 reflectDir = reflect(-lightDir, norm);
-  float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-  vec3 specular = light.specular * (material.specular * spec);
   
-  vec3 result = ambient + diffuse + specular;
-  fragColor = vec4(result, 1.0);
+  if(!useTexMaterial){
+    // ambient
+    vec3 ambient = light.ambient * material.ambient;
+    // diffuse
+    vec3 diffuse = light.diffuse * (diff * material.diffuse);
+    // specular
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+    vec3 specular = light.specular * (material.specular * spec);
+    vec3 result = ambient + diffuse + specular;
+    fragColor = vec4(result, 1.0);
+  }
+  else{
+    vec3 diffuse = light.diffuse * diff * vec3(texture(textMaterial.diffuse, TexCoords));
+    vec3 ambient = light.ambient * vec3(texture(textMaterial.diffuse, TexCoords));
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), textMaterial.shininess);
+    vec3 specular = light.specular * (textMaterial.specular * spec);
+    vec3 result = ambient + diffuse + specular;
+    fragColor = vec4(result, 1.0);
+  }
 }

@@ -10,11 +10,12 @@ uniform mat4 cubeModelMatrix;
 //Default from OF::shader
 in vec4  position;
 in vec3 normal;
+in vec2  texcoord;
 out vec3 FragPos;
 out vec3 Normal;
 //Out for frag
 out vec4 colorVarying;
-
+out vec2 TexCoords;
 
 //Uniform setup in ofApp
 uniform mat4 modView;
@@ -26,4 +27,5 @@ void main() {
   gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;
   FragPos = vec3(modelMatrix * vec4(position.xyz, 1.0));
   Normal = normal;
+  TexCoords = texcoord;
 }

@@ -26,6 +26,7 @@ class ofApp : public ofBaseApp{
   void drawLights();
   ofBoxPrimitive cube;
   ofBoxPrimitive light;
+  ofPlanePrimitive plane;
   ofSpherePrimitive sphere;
   ofEasyCam cam;
   ofShader shader;
@@ -39,6 +40,8 @@ class ofApp : public ofBaseApp{
   ofxColorSlider materialDiffuseColor;
   ofxIntSlider  materialShininess;
   ofxFloatSlider materialSpecular;
+
+  ofImage textureImage;
   
   ofxPanel gui;
 };

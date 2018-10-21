@@ -4,6 +4,10 @@
 void ofApp::setup(){
   gui.setup();
   
+  // Texture
+  ofDisableArbTex();
+  textureImage.load("container.png");
+  
   // Light
   gui.add(lightPos.setup("Light pos", ofVec3f(0), ofVec3f(600),ofVec3f(-600)));
   gui.add(lightAmbientColor.setup("Light Ambient Color", ofFloatColor(0.2), ofFloatColor(0), ofFloatColor(1)));
@@ -20,6 +24,7 @@ void ofApp::setup(){
   
   light.set(10, 10, 10);
   sphere.set(100, 100);
+  plane.set(1000, 1000, 10, 10);
   cube.enableNormals();
   
   shader.load("shaders/light");
@@ -32,12 +37,17 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
   cam.begin();
+  ofEnableArbTex();
+  ofDisableArbTex();
   ofSetColor(ofColor::yellow);//FRONT
   ofEnableDepthTest();
   glEnable(GL_CULL_FACE);
   glCullFace(GL_FRONT);
   shader.begin();
+  shader.setUniformTexture("diffuseText", textureImage.getTexture() , 1);
   shader.setUniform3f("viewPos", cam.getGlobalPosition());
+  shader.setUniform3f("textMaterial.specular", materialSpecular, materialSpecular, materialSpecular);
+  shader.setUniform1f("textMaterial.shininess",  pow(2, (int)materialShininess));
   ofColor tempLightColor;
   shader.setUniform3f("light.position", lightPos);
   tempLightColor = lightAmbientColor;
@@ -54,8 +64,11 @@ void ofApp::draw(){
   shader.setUniform1f("material.shininess",  pow(2, (int)materialShininess));
   
   
-//  shader.setUniform1f("ambientLightStrength", ambientLightStrength);
+  ofDisableArbTex();
+  textureImage.getTexture().bind();
+  shader.setUniformTexture("material.diffuse", textureImage.getTexture() , 0);
   drawScene();
+  textureImage.getTexture().unbind();
   shader.end();
   drawLights();
   ofDisableDepthTest();
@@ -72,9 +85,11 @@ void ofApp::drawLights(){
 }
 
 void ofApp::drawScene(){
+//  sphere.mapTexCoordsFromTexture( texture.getTexture() );
   ofPushMatrix();
   ofTranslate(200,0);
-  sphere.getMesh().draw();
+  cube.draw();
+  //sphere.getMesh().draw();
   ofPopMatrix();
   ofPushMatrix();
   ofTranslate(-200,0);
@@ -83,6 +98,11 @@ void ofApp::drawScene(){
   ofPushMatrix();
   ofTranslate(200,0,200);
   cube.getMesh().draw();
+  ofPopMatrix();
+  ofPushMatrix();
+  //ofTranslate(200,0,200);
+  ofRotateXDeg(-90);
+//  plane.getMesh().draw();
   ofPopMatrix();
 }
 
