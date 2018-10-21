@@ -30,13 +30,13 @@ uniform mat4 modelMatrix;
 uniform vec3 lightColor;
 uniform vec3 cubeColor;
 uniform vec3 viewPos;
+uniform bool useTextureMaterial;
 
 in vec2 TexCoords;
 in vec3 Normal;
 in vec3 FragPos;
 out vec4 fragColor;
 
-bool useTexMaterial = true;
 
 void main (void) {
   vec3 norm = normalize(Normal.xyz);
@@ -48,9 +48,9 @@ void main (void) {
   vec3 ambient;
   vec3 diffuse;
   vec3 specular;
-  float shininess = (useTexMaterial) ? textMaterial.shininess : material.shininess;
+  float shininess = (useTextureMaterial) ? textMaterial.shininess : material.shininess;
   float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-  if(!useTexMaterial){
+  if(!useTextureMaterial){
     ambient = light.ambient * material.ambient;
     diffuse = light.diffuse * (diff * material.diffuse);
     specular = light.specular * (material.specular * spec);
