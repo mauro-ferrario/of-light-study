@@ -7,6 +7,7 @@ void ofApp::setup(){
   // Texture
   ofDisableArbTex();
   textureImage.load("container.png");
+  textureSpecularImage.load("container_specular.png");
   
   // Light
   gui.add(lightPos.setup("Light pos", ofVec3f(0), ofVec3f(600),ofVec3f(-600)));
@@ -37,8 +38,6 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
   cam.begin();
-  ofEnableArbTex();
-  ofDisableArbTex();
   ofSetColor(ofColor::yellow);//FRONT
   ofEnableDepthTest();
   glEnable(GL_CULL_FACE);
@@ -46,8 +45,10 @@ void ofApp::draw(){
   shader.begin();
   shader.setUniformTexture("diffuseText", textureImage.getTexture() , 1);
   shader.setUniform3f("viewPos", cam.getGlobalPosition());
-  shader.setUniform3f("textMaterial.specular", materialSpecular, materialSpecular, materialSpecular);
   shader.setUniform1f("textMaterial.shininess",  pow(2, (int)materialShininess));
+  shader.setUniformTexture("textMaterial.diffuse", textureImage.getTexture() , 0);
+  shader.setUniformTexture("textMaterial.specular", textureSpecularImage.getTexture() , 1);
+  
   ofColor tempLightColor;
   shader.setUniform3f("light.position", lightPos);
   tempLightColor = lightAmbientColor;
@@ -63,12 +64,7 @@ void ofApp::draw(){
   shader.setUniform3f("material.specular", materialSpecular, materialSpecular, materialSpecular);
   shader.setUniform1f("material.shininess",  pow(2, (int)materialShininess));
   
-  
-  ofDisableArbTex();
-  textureImage.getTexture().bind();
-  shader.setUniformTexture("material.diffuse", textureImage.getTexture() , 0);
   drawScene();
-  textureImage.getTexture().unbind();
   shader.end();
   drawLights();
   ofDisableDepthTest();
@@ -85,11 +81,9 @@ void ofApp::drawLights(){
 }
 
 void ofApp::drawScene(){
-//  sphere.mapTexCoordsFromTexture( texture.getTexture() );
   ofPushMatrix();
   ofTranslate(200,0);
   cube.draw();
-  //sphere.getMesh().draw();
   ofPopMatrix();
   ofPushMatrix();
   ofTranslate(-200,0);
@@ -100,9 +94,8 @@ void ofApp::drawScene(){
   cube.getMesh().draw();
   ofPopMatrix();
   ofPushMatrix();
-  //ofTranslate(200,0,200);
   ofRotateXDeg(-90);
-//  plane.getMesh().draw();
+  plane.getMesh().draw();
   ofPopMatrix();
 }
 

@@ -42,6 +42,7 @@ class ofApp : public ofBaseApp{
   ofxFloatSlider materialSpecular;
 
   ofImage textureImage;
+  ofImage textureSpecularImage;
   
   ofxPanel gui;
 };
