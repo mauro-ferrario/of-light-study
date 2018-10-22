@@ -36,7 +36,6 @@ class ofApp : public ofBaseApp{
   
     ofBoxPrimitive        cube;
     ofBoxPrimitive        light;
-    ofPlanePrimitive      plane;
     ofSpherePrimitive     sphere;
     ofEasyCam             cam;
     ofShader              shader;
@@ -44,15 +43,13 @@ class ofApp : public ofBaseApp{
     ofxDatGui*            gui;
     bool                  useTextureMaterial;
     bool                  enableCamInteraction;
-    bool                  drawPlane;
-    bool                  drawCube1;
-    bool                  drawCube2;
-    bool                  drawSphere;
 
     ofVec3f               lightPos;
+    ofVec3f               cubePos;
     ofColor               lightAmbientColor;
     ofColor               lightDiffuseColor;
     float                 lightSpecular;
+    float                 cubeRotation;
   
     ofColor               materialAmbientColor;
     ofColor               materialDiffuseColor;

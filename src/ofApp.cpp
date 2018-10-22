@@ -16,8 +16,6 @@ void ofApp::setupShader(){
 
 void ofApp::setup3dElements(){
   light.set(10, 10, 10);
-  sphere.set(100, 100);
-  plane.set(1000, 1000, 10, 10);
 }
 
 void ofApp::setupTextures(){
@@ -29,12 +27,9 @@ void ofApp::setupTextures(){
 
 void ofApp::setupDefaultValues(){
   useTextureMaterial = true;
-  enableCamInteraction = false;
-  drawSphere = true;
-  drawCube1 = true;
-  drawCube2 = true;
-  drawPlane = false;
-  lightPos = ofVec3f(0.0);
+  enableCamInteraction = true;
+  lightPos = ofVec3f(0.0, 0.0, 100.0);
+  lightAmbientColor = ofColor(0);
 }
 
 void ofApp::setupGUI(){
@@ -61,10 +56,10 @@ void ofApp::setupGUI(){
   textureFolder->addColorPicker("Diffuse Color", ofFloatColor(1,0.5,0.31));
   textureFolder->addSlider("Specular", 0.0, 1.0, 0.5);
   
-  meshFolder->addToggle("Draw sphere", drawSphere);
-  meshFolder->addToggle("Draw cube 1", drawCube1);
-  meshFolder->addToggle("Draw cube 2", drawCube2);
-  meshFolder->addToggle("Draw plane", drawPlane);
+  meshFolder->addSlider("Cube pos x", -600, 600, 0);
+  meshFolder->addSlider("Cube pos y", -600, 600, 0);
+  meshFolder->addSlider("Cube pos z", -600, 600, 0);
+  meshFolder->addSlider("Cube rotation", 0, 360, 0);
   
   gui->onButtonEvent(this, &ofApp::onButtonEvent);
   gui->onSliderEvent(this, &ofApp::onSliderEvent);
@@ -79,18 +74,6 @@ void ofApp::onButtonEvent(ofxDatGuiButtonEvent e)
   }
   if(label == "Enable cam interaction"){
     enableCamInteraction = !enableCamInteraction;
-  }
-  if(label == "Draw cube 1"){
-    drawCube1 = !drawCube1;
-  }
-  if(label == "Draw cube 2"){
-    drawCube1 = !drawCube2;
-  }
-  if(label == "Draw sphere"){
-    drawSphere = !drawSphere;
-  }
-  if(label == "Draw plane"){
-    drawPlane = !drawPlane;
   }
 }
 
@@ -114,6 +97,18 @@ void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
   }
   if(label == "Specular"){
     materialSpecular = e.target->getValue();
+  }
+  if(label == "Cube pos x"){
+    cubePos.x = e.target->getValue();
+  }
+  if(label == "Cube pos y"){
+    cubePos.y = e.target->getValue();
+  }
+  if(label == "Cube pos z"){
+    cubePos.z = e.target->getValue();
+  }
+  if(label == "Cube rotation"){
+    cubeRotation = e.target->getValue();
   }
 }
 
@@ -148,10 +143,9 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw(){
   cam.begin();
-  ofSetColor(ofColor::yellow);//FRONT
   ofEnableDepthTest();
-  glEnable(GL_CULL_FACE);
-  glCullFace(GL_FRONT);
+  glFrontFace(GL_FRONT);
+  
   shader.begin();
   shader.setUniform1i("useTextureMaterial", useTextureMaterial);
   shader.setUniformTexture("diffuseText", textureImage.getTexture() , 1);
@@ -188,30 +182,13 @@ void ofApp::drawLights(){
 }
 
 void ofApp::drawScene(){
-  if(drawCube1){
-    ofPushMatrix();
-    ofTranslate(200,0);
-    cube.draw();
-    ofPopMatrix();
-  }
-  if(drawCube2){
-    ofPushMatrix();
-    ofTranslate(200,0,200);
-    cube.getMesh().draw();
-    ofPopMatrix();
-  }
-  if(drawSphere){
-    ofPushMatrix();
-    ofTranslate(-200,0);
-    sphere.getMesh().draw();
-    ofPopMatrix();
-  }
-  if(drawPlane){
-    ofPushMatrix();
-    ofRotateXDeg(-90);
-    plane.getMesh().draw();
-    ofPopMatrix();
-  }
+  ofPushMatrix();
+  ofTranslate(cubePos);
+  ofRotateXDeg(cubeRotation);
+  //  cube.setPosition(cubePos);
+  shader.setUniformMatrix4f("model", cube.getGlobalTransformMatrix());
+  cube.getMesh().draw();
+  ofPopMatrix();
 }
 
 //--------------------------------------------------------------
