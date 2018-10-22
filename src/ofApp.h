@@ -51,6 +51,10 @@ class ofApp : public ofBaseApp{
     float                 lightSpecular;
     float                 cubeRotation;
   
+    float                 lightConstant;
+    float                 lightLinear;
+    float                 lightQuadratic;
+  
     ofColor               materialAmbientColor;
     ofColor               materialDiffuseColor;
     float                 materialShininess;

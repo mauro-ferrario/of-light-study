@@ -33,6 +33,10 @@ void ofApp::setupDefaultValues(){
   
   directionalLightDirection = ofVec3f(0.4,0.4,0.3);
   lightAmbientColor = ofColor(0);
+  
+  lightConstant = 1.0;
+  lightLinear = 0.09f;
+  lightQuadratic = 0.032f;
 }
 
 void ofApp::setupGUI(){
@@ -47,6 +51,10 @@ void ofApp::setupGUI(){
   lightFolder->addSlider("Light pos x", -600, 600, 0);
   lightFolder->addSlider("Light pos y", -600, 600, 0);
   lightFolder->addSlider("Light pos z", -600, 600, 0);
+  
+  lightFolder->addSlider("Light Linear", 0.0014, 0.7, lightLinear);
+  lightFolder->addSlider("Light Quadratic", 0.000007, 1.8, lightQuadratic);
+  
   lightFolder->addColorPicker("Light Ambient Color", ofFloatColor(0.2));
   lightFolder->addColorPicker("Light Diffuse Color", ofFloatColor(0.5));
   lightFolder->addSlider("Light Specular", 0.0, 1.0, 1.0);
@@ -101,6 +109,14 @@ void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
   if(label == "Light pos z"){
     lightPos.z = e.target->getValue();
   }
+  
+  if(label == "Light linear"){
+    lightLinear = e.target->getValue();
+  }
+  if(label == "Light quadratic"){
+    lightQuadratic = e.target->getValue();
+  }
+  
   if(label == "Light direction x"){
     directionalLightDirection.x = e.target->getValue();
   }
@@ -188,6 +204,10 @@ void ofApp::draw(){
   shader.setUniform3f("light.ambient", lightAmbientColor.r/255.0, lightAmbientColor.g/255.0, lightAmbientColor.b/255.0);
   shader.setUniform3f("light.diffuse", lightDiffuseColor.r/255.0, lightDiffuseColor.g/255.0, lightDiffuseColor.b/255.0);
   shader.setUniform3f("light.specular", lightSpecular, lightSpecular, lightSpecular);
+  // For the attenuation
+  shader.setUniform1f("light.constant", lightConstant);
+  shader.setUniform1f("light.linear", lightLinear);
+  shader.setUniform1f("light.quadratic", lightQuadratic);
   
   
   // Directional Light
