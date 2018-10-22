@@ -19,13 +19,11 @@ out vec2 TexCoords;
 
 //Uniform setup in ofApp
 uniform mat4 modView;
-
+uniform mat4 model;
 
 void main() {
-  
-  //gl_Position = projectionMatrix * modelViewMatrix * position;
   gl_Position = projectionMatrix * viewMatrix * modelMatrix * position;
   FragPos = vec3(modelMatrix * vec4(position.xyz, 1.0));
-  Normal = normal;
+  Normal = ( inverse(transpose(modelMatrix)) * vec4(normal, 0.0)).xyz;
   TexCoords = texcoord;
 }
