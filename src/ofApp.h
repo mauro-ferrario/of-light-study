@@ -58,4 +58,10 @@ class ofApp : public ofBaseApp{
 
     ofImage               textureImage;
     ofImage               textureSpecularImage;
+  
+  
+    ofVec3f               directionalLightDirection;
+    ofColor               directionalLightAmbientColor;
+    ofColor               directionalLightDiffuseColor;
+    float                 directionalLightSpecular;
 };

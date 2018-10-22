@@ -30,12 +30,16 @@ void ofApp::setupDefaultValues(){
   enableCamInteraction = true;
   lightPos = ofVec3f(0.0, 0.0, 100.0);
   lightAmbientColor = ofColor(0);
+  
+  directionalLightDirection = ofVec3f(0.4,0.4,0.3);
+  lightAmbientColor = ofColor(0);
 }
 
 void ofApp::setupGUI(){
   gui = new ofxDatGui( ofxDatGuiAnchor::TOP_LEFT );
   gui->addToggle("Enable cam interaction", enableCamInteraction);
   ofxDatGuiFolder* lightFolder = gui->addFolder("Light", ofColor::white);
+  ofxDatGuiFolder* directionalLightFolder = gui->addFolder("Light", ofColor::purple);
   ofxDatGuiFolder* textureFolder = gui->addFolder("Texture", ofColor::blue);
   ofxDatGuiFolder* meshFolder = gui->addFolder("Mesh", ofColor::red);
   
@@ -46,6 +50,14 @@ void ofApp::setupGUI(){
   lightFolder->addColorPicker("Light Ambient Color", ofFloatColor(0.2));
   lightFolder->addColorPicker("Light Diffuse Color", ofFloatColor(0.5));
   lightFolder->addSlider("Light Specular", 0.0, 1.0, 1.0);
+  
+  // Directional Light
+  directionalLightFolder->addSlider("Light direction x", -1, 1, 0);
+  directionalLightFolder->addSlider("Light direction y", -1, 1, 0);
+  directionalLightFolder->addSlider("Light direction z", -1, 1, 0);
+  directionalLightFolder->addColorPicker("Directional Ambient Color", ofFloatColor(0.2));
+  directionalLightFolder->addColorPicker("Directional Diffuse Color", ofFloatColor(0.5));
+  directionalLightFolder->addSlider("Directional Specular", 0.0, 1.0, 1.0);
   
   // Material props
   
@@ -89,8 +101,21 @@ void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
   if(label == "Light pos z"){
     lightPos.z = e.target->getValue();
   }
+  if(label == "Light direction x"){
+    directionalLightDirection.x = e.target->getValue();
+  }
+  if(label == "Light direction y"){
+    directionalLightDirection.y = e.target->getValue();
+  }
+  if(label == "Light direction z"){
+    directionalLightDirection.z = e.target->getValue();
+  }
   if(label == "Light Specular"){
     lightSpecular = e.target->getValue();
+  }
+  
+  if(label == "Directional Specular"){
+    directionalLightSpecular = e.target->getValue();
   }
   if(label == "Material Shininess"){
     materialShininess = e.target->getValue();
@@ -120,6 +145,13 @@ void ofApp::onColorEvent(ofxDatGuiColorPickerEvent e)
   }
   if(label == "Light Diffuse Color"){
     lightDiffuseColor = e.target->getColor();
+  }
+  
+  if(label == "Directional Ambient Color"){
+    directionalLightAmbientColor = e.target->getColor();
+  }
+  if(label == "Directional Diffuse Color"){
+    directionalLightDiffuseColor = e.target->getColor();
   }
   
   if(label == "Ambient Color"){
@@ -156,6 +188,14 @@ void ofApp::draw(){
   shader.setUniform3f("light.ambient", lightAmbientColor.r/255.0, lightAmbientColor.g/255.0, lightAmbientColor.b/255.0);
   shader.setUniform3f("light.diffuse", lightDiffuseColor.r/255.0, lightDiffuseColor.g/255.0, lightDiffuseColor.b/255.0);
   shader.setUniform3f("light.specular", lightSpecular, lightSpecular, lightSpecular);
+  
+  
+  // Directional Light
+  shader.setUniform3f("directionalLight.direction", directionalLightDirection);
+  shader.setUniform3f("directionalLight.ambient", directionalLightAmbientColor.r/255.0, directionalLightAmbientColor.g/255.0, directionalLightAmbientColor.b/255.0);
+  shader.setUniform3f("directionalLight.diffuse", directionalLightDiffuseColor.r/255.0, directionalLightDiffuseColor.g/255.0, directionalLightDiffuseColor.b/255.0);
+  shader.setUniform3f("directionalLight.specular", directionalLightSpecular, directionalLightSpecular, directionalLightSpecular);
+  
   // Material
   shader.setUniform3f("material.ambient", materialAmbientColor.r/255.0, materialAmbientColor.g/255.0, materialAmbientColor.b/255.0);
   shader.setUniform3f("material.diffuse", materialDiffuseColor.r/255.0, materialDiffuseColor.g/255.0, materialDiffuseColor.b/255.0);
