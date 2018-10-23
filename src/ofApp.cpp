@@ -22,6 +22,7 @@ void ofApp::setupShader(){
 void ofApp::setup3dElements(){
   light.set(10, 10, 10);
   cube.set(1000, 1000, 1000, 10,10,10);
+  cube2.set(1000, 1000, 1000, 10,10,10);
   sphere2.set(1000, 10);
 }
 
@@ -58,7 +59,7 @@ void ofApp::setupDefaultValues(){
 void ofApp::setupGUI(){
   gui = new ofxDatGui( ofxDatGuiAnchor::TOP_LEFT );
   gui->addToggle("Enable cam interaction", enableCamInteraction);
-  ofxDatGuiFolder* lightFolder = gui->addFolder("Light", ofColor::white);
+  ofxDatGuiFolder* lightFolder = gui->addFolder("Point Light", ofColor::white);
   ofxDatGuiFolder* directionalLightFolder = gui->addFolder("Directional Light", ofColor::purple);
   ofxDatGuiFolder* spotLightFolder = gui->addFolder("Spot Light", ofColor::purple);
   ofxDatGuiFolder* textureFolder = gui->addFolder("Texture", ofColor::blue);
@@ -270,13 +271,10 @@ void ofApp::update(){
   }
 }
 
-//--------------------------------------------------------------
-void ofApp::draw(){
-  cam.begin();
-  ofEnableDepthTest();
-  glFrontFace(GL_FRONT);
-  
+void ofApp::beginShader(glm::mat4 modelMatrix){
   shader.begin();
+  shader.setUniform1f("time", ofGetElapsedTimef());
+  shader.setUniformMatrix4f("model", modelMatrix);
   shader.setUniform1f("near", cam.getNearClip());
   shader.setUniform1f("far", cam.getFarClip());
   shader.setUniform1i("useTextureMaterial", useTextureMaterial);
@@ -320,9 +318,19 @@ void ofApp::draw(){
   shader.setUniform1f("textMaterial.shininess",  pow(2, (int)materialShininess));
   shader.setUniformTexture("textMaterial.diffuse", textureImage.getTexture() , 0);
   shader.setUniformTexture("textMaterial.specular", textureSpecularImage.getTexture() , 1);
-  
-  drawScene();
+}
+
+
+void ofApp::endShader(){
   shader.end();
+}
+
+//--------------------------------------------------------------
+void ofApp::draw(){
+  cam.begin();
+  ofEnableDepthTest();
+  glFrontFace(GL_FRONT);
+  drawScene();
   drawLights();
   ofDisableDepthTest();
   cam.end();
@@ -345,8 +353,16 @@ void ofApp::drawScene(){
   ofPushMatrix();
   ofTranslate(cubePos);
   ofRotateXDeg(cubeRotation);
-  shader.setUniformMatrix4f("model", cube.getGlobalTransformMatrix());
+  beginShader(cube.getGlobalTransformMatrix());
   cube.getMesh().draw();
+  endShader();
+  ofPopMatrix();
+  
+  ofPushMatrix();
+  ofTranslate(5000.0,0,0);
+  beginShader(cube2.getGlobalTransformMatrix());
+  cube2.getMesh().draw();
+  endShader();
   ofPopMatrix();
 }
 

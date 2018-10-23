@@ -36,8 +36,11 @@ class ofApp : public ofBaseApp{
     void                  setupTextures();
     void                  setupShader();
     void                  setup3dElements();
+    void                  beginShader(glm::mat4 modelMatrix);
+    void                  endShader();
   
     ofBoxPrimitive        cube;
+    ofBoxPrimitive        cube2;
     ofSpherePrimitive     sphere;
     ofBoxPrimitive        light;
     ofSpherePrimitive     sphere2;

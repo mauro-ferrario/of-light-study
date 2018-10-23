@@ -64,6 +64,7 @@ uniform bool useTextureMaterial;
 
 uniform float near;
 uniform float far;
+uniform float time;
 
 in vec2 TexCoords;
 in vec3 Normal;
@@ -146,7 +147,8 @@ void main (void) {
     spotDiffuse = spotLight.diffuse * diffSpot * texture(textMaterial.diffuse, TexCoords).rgb;
     spotSpecular = spotLight.specular * specSpot * texture(textMaterial.specular, TexCoords).rgb;
   }
-  attenuation *= 1000.0;
+  attenuation *= 0.14*1000000.0;
+//  attenuation *= sin(time*4.0)*1000000.0;
   ambient *= attenuation;
   diffuse *= attenuation;
   specular *= attenuation;
