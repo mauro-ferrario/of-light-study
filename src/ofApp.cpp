@@ -16,6 +16,8 @@ void ofApp::setupShader(){
 
 void ofApp::setup3dElements(){
   light.set(10, 10, 10);
+  cube.set(1000, 1000, 1000, 10,10,10);
+  sphere2.set(1000, 10);
 }
 
 void ofApp::setupTextures(){
@@ -32,25 +34,35 @@ void ofApp::setupDefaultValues(){
   lightAmbientColor = ofColor(0);
   
   directionalLightDirection = ofVec3f(0.4,0.4,0.3);
-  lightAmbientColor = ofColor(0);
+  directionalLightAmbientColor = ofColor(0);
   
   lightConstant = 1.0;
   lightLinear = 0.09f;
   lightQuadratic = 0.032f;
+  
+  spotLightAmbientColor = ofColor(0);
+  spotLightPos = ofVec3f(-9.84, 0.0, 88.52);
+  spotLightDirection = ofVec3f(0.18,0.0,-1.0);
+  spotLightSpecular = 1;
+  spotLightCuttOff = 0.86;
+  spotLightConstant = 1.0;
+  spotLightLinear = 0.09;
+  spotLightQuadratic = 0.032;
 }
 
 void ofApp::setupGUI(){
   gui = new ofxDatGui( ofxDatGuiAnchor::TOP_LEFT );
   gui->addToggle("Enable cam interaction", enableCamInteraction);
   ofxDatGuiFolder* lightFolder = gui->addFolder("Light", ofColor::white);
-  ofxDatGuiFolder* directionalLightFolder = gui->addFolder("Light", ofColor::purple);
+  ofxDatGuiFolder* directionalLightFolder = gui->addFolder("Directional Light", ofColor::purple);
+  ofxDatGuiFolder* spotLightFolder = gui->addFolder("Spot Light", ofColor::purple);
   ofxDatGuiFolder* textureFolder = gui->addFolder("Texture", ofColor::blue);
   ofxDatGuiFolder* meshFolder = gui->addFolder("Mesh", ofColor::red);
   
   // Light
-  lightFolder->addSlider("Light pos x", -600, 600, 0);
-  lightFolder->addSlider("Light pos y", -600, 600, 0);
-  lightFolder->addSlider("Light pos z", -600, 600, 0);
+  lightFolder->addSlider("Light pos x", -6000, 6000, 0);
+  lightFolder->addSlider("Light pos y", -6000, 6000, 0);
+  lightFolder->addSlider("Light pos z", -6000, 6000, 0);
   
   lightFolder->addSlider("Light Linear", 0.0014, 0.7, lightLinear);
   lightFolder->addSlider("Light Quadratic", 0.000007, 1.8, lightQuadratic);
@@ -67,6 +79,22 @@ void ofApp::setupGUI(){
   directionalLightFolder->addColorPicker("Directional Diffuse Color", ofFloatColor(0.5));
   directionalLightFolder->addSlider("Directional Specular", 0.0, 1.0, 1.0);
   
+  
+  // Spot Light
+  spotLightFolder->addSlider("Spot pos x", -6000, 6000, spotLightPos.x);
+  spotLightFolder->addSlider("Spot pos y", -6000, 6000, spotLightPos.y);
+  spotLightFolder->addSlider("Spot pos z", -6000, 6000, spotLightPos.z);
+  spotLightFolder->addSlider("Spot direction x", -1, 1, spotLightDirection.x);
+  spotLightFolder->addSlider("Spot direction y", -1, 1, spotLightDirection.y);
+  spotLightFolder->addSlider("Spot direction z", -1, 1, spotLightDirection.y);
+  spotLightFolder->addColorPicker("Spot Ambient Color", ofFloatColor(0.2));
+  spotLightFolder->addColorPicker("Spot Diffuse Color", ofFloatColor(0.5));
+  spotLightFolder->addSlider("Spot Specular", 0.0, 1.0, spotLightSpecular);
+  spotLightFolder->addSlider("Spot cuttOff", 0.0, 21.0, spotLightCuttOff);
+  spotLightFolder->addSlider("Spot outerCuttOff", 0.0, 21.0, spotLightOuterCuttOff);
+  spotLightFolder->addSlider("Spot Linear", 0.0014, 0.7, spotLightLinear);
+  spotLightFolder->addSlider("Spot Quadratic", 0.000007, 1.8, spotLightQuadratic);
+
   // Material props
   
   textureFolder->addToggle("Use texture material", useTextureMaterial);
@@ -76,9 +104,9 @@ void ofApp::setupGUI(){
   textureFolder->addColorPicker("Diffuse Color", ofFloatColor(1,0.5,0.31));
   textureFolder->addSlider("Specular", 0.0, 1.0, 0.5);
   
-  meshFolder->addSlider("Cube pos x", -600, 600, 0);
-  meshFolder->addSlider("Cube pos y", -600, 600, 0);
-  meshFolder->addSlider("Cube pos z", -600, 600, 0);
+  meshFolder->addSlider("Cube pos x", -6000, 6000, 0);
+  meshFolder->addSlider("Cube pos y", -6000, 6000, 0);
+  meshFolder->addSlider("Cube pos z", -6000, 6000, 0);
   meshFolder->addSlider("Cube rotation", 0, 360, 0);
   
   gui->onButtonEvent(this, &ofApp::onButtonEvent);
@@ -100,6 +128,8 @@ void ofApp::onButtonEvent(ofxDatGuiButtonEvent e)
 void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
 {
   string label =  e.target->getLabel();
+  
+  // Point light
   if(label == "Light pos x"){
     lightPos.x = e.target->getValue();
   }
@@ -117,6 +147,8 @@ void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
     lightQuadratic = e.target->getValue();
   }
   
+  
+  // Directional light
   if(label == "Light direction x"){
     directionalLightDirection.x = e.target->getValue();
   }
@@ -136,6 +168,43 @@ void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
   if(label == "Material Shininess"){
     materialShininess = e.target->getValue();
   }
+  
+  // Spot light
+  if(label == "Spot pos x"){
+    spotLightPos.x = e.target->getValue();
+  }
+  if(label == "Spot pos y"){
+    spotLightPos.y = e.target->getValue();
+  }
+  if(label == "Spot pos z"){
+    spotLightPos.z = e.target->getValue();
+  }
+  if(label == "Spot direction x"){
+    spotLightDirection.x = e.target->getValue();
+  }
+  if(label == "Spot direction y"){
+    spotLightDirection.y = e.target->getValue();
+  }
+  if(label == "Spot direction z"){
+    spotLightDirection.z = e.target->getValue();
+  }
+  if(label == "Spot Specular"){
+    spotLightSpecular = e.target->getValue();
+  }
+  if(label == "Spot cuttOff"){
+    spotLightCuttOff = e.target->getValue();
+  }
+  if(label == "Spot outerCuttOff"){
+    spotLightOuterCuttOff = e.target->getValue();
+  }
+  if(label == "Spot linear"){
+    spotLightLinear = e.target->getValue();
+  }
+  if(label == "Spot quadratic"){
+    spotLightQuadratic = e.target->getValue();
+  }
+  
+  
   if(label == "Specular"){
     materialSpecular = e.target->getValue();
   }
@@ -168,6 +237,14 @@ void ofApp::onColorEvent(ofxDatGuiColorPickerEvent e)
   }
   if(label == "Directional Diffuse Color"){
     directionalLightDiffuseColor = e.target->getColor();
+  }
+  
+  
+  if(label == "Spot Ambient Color"){
+    spotLightAmbientColor = e.target->getColor();
+  }
+  if(label == "Spot Diffuse Color"){
+    spotLightDiffuseColor = e.target->getColor();
   }
   
   if(label == "Ambient Color"){
@@ -216,6 +293,17 @@ void ofApp::draw(){
   shader.setUniform3f("directionalLight.diffuse", directionalLightDiffuseColor.r/255.0, directionalLightDiffuseColor.g/255.0, directionalLightDiffuseColor.b/255.0);
   shader.setUniform3f("directionalLight.specular", directionalLightSpecular, directionalLightSpecular, directionalLightSpecular);
   
+  // Spot Light
+  shader.setUniform3f("spotLight.position", spotLightPos);
+  shader.setUniform3f("spotLight.direction", spotLightDirection);
+  shader.setUniform3f("spotLight.ambient", spotLightAmbientColor.r/255.0, spotLightAmbientColor.g/255.0, spotLightAmbientColor.b/255.0);
+  shader.setUniform3f("spotLight.diffuse", spotLightDiffuseColor.r/255.0, spotLightDiffuseColor.g/255.0, spotLightDiffuseColor.b/255.0);
+  shader.setUniform3f("spotLight.specular", spotLightSpecular, spotLightSpecular, spotLightSpecular);
+  shader.setUniform1f("spotLight.cutOff", spotLightCuttOff);
+  shader.setUniform1f("spotLight.outerCutOff", spotLightOuterCuttOff);
+  shader.setUniform1f("spotLight.linear", spotLightLinear);
+  shader.setUniform1f("spotLight.quadratic", spotLightQuadratic);
+  
   // Material
   shader.setUniform3f("material.ambient", materialAmbientColor.r/255.0, materialAmbientColor.g/255.0, materialAmbientColor.b/255.0);
   shader.setUniform3f("material.diffuse", materialDiffuseColor.r/255.0, materialDiffuseColor.g/255.0, materialDiffuseColor.b/255.0);
@@ -239,6 +327,11 @@ void ofApp::drawLights(){
   ofSetColor(255);
   light.getMesh().draw();
   ofPopMatrix();
+  ofPushMatrix();
+  ofTranslate(spotLightPos);
+  ofSetColor(255, 255,0);
+  light.getMesh().draw();
+  ofPopMatrix();
 }
 
 void ofApp::drawScene(){
@@ -246,8 +339,8 @@ void ofApp::drawScene(){
   ofTranslate(cubePos);
   ofRotateXDeg(cubeRotation);
   //  cube.setPosition(cubePos);
-  shader.setUniformMatrix4f("model", cube.getGlobalTransformMatrix());
-  cube.getMesh().draw();
+  shader.setUniformMatrix4f("model", sphere2.getGlobalTransformMatrix());
+  sphere2.getMesh().draw();
   ofPopMatrix();
 }
 

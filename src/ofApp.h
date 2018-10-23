@@ -2,6 +2,7 @@
 
 #include "ofMain.h"
 #include "ofxDatGui.h"
+#include "ofxAutoReloadedShader.h"
 
 class ofApp : public ofBaseApp{
 
@@ -22,6 +23,8 @@ class ofApp : public ofBaseApp{
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
   
+    ofxAutoReloadedShader shader;
+//    ofShader              shader;
     void                  drawScene();
     void                  drawLights();
     void                  onButtonEvent(ofxDatGuiButtonEvent e);
@@ -35,10 +38,10 @@ class ofApp : public ofBaseApp{
     void                  setup3dElements();
   
     ofBoxPrimitive        cube;
-    ofBoxPrimitive        light;
     ofSpherePrimitive     sphere;
+    ofBoxPrimitive        light;
+    ofSpherePrimitive     sphere2;
     ofEasyCam             cam;
-    ofShader              shader;
   
     ofxDatGui*            gui;
     bool                  useTextureMaterial;
@@ -68,4 +71,15 @@ class ofApp : public ofBaseApp{
     ofColor               directionalLightAmbientColor;
     ofColor               directionalLightDiffuseColor;
     float                 directionalLightSpecular;
+  
+    ofVec3f               spotLightDirection;
+    ofVec3f               spotLightPos;
+    ofColor               spotLightAmbientColor;
+    ofColor               spotLightDiffuseColor;
+    float                 spotLightSpecular;
+    float                 spotLightCuttOff;
+    float                 spotLightOuterCuttOff;
+    float                 spotLightConstant;
+    float                 spotLightLinear;
+    float                 spotLightQuadratic;
 };
