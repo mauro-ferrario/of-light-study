@@ -62,6 +62,9 @@ uniform vec3 cubeColor;
 uniform vec3 viewPos;
 uniform bool useTextureMaterial;
 
+uniform float near;
+uniform float far;
+
 in vec2 TexCoords;
 in vec3 Normal;
 in vec3 FragPos;
@@ -70,6 +73,12 @@ out vec4 fragColor;
 float pointLightMultiplier = 0.001;
 
 #define M_PI 3.1415926535897932384626433832795
+
+float LinearizeDepth(float depth)
+{
+  float z = depth * 2.0 - 1.0; // back to NDC
+  return (2.0 * near * far) / (far + near - z * (far - near));
+}
 
 void main (void) {
   vec3 norm = normalize(Normal.xyz);
@@ -137,7 +146,7 @@ void main (void) {
     spotDiffuse = spotLight.diffuse * diffSpot * texture(textMaterial.diffuse, TexCoords).rgb;
     spotSpecular = spotLight.specular * specSpot * texture(textMaterial.specular, TexCoords).rgb;
   }
-  attenuation *= 10000.0;
+  attenuation *= 1000.0;
   ambient *= attenuation;
   diffuse *= attenuation;
   specular *= attenuation;
@@ -153,4 +162,8 @@ void main (void) {
   result = ambient + diffuse + specular + directionalSpecular + directionalDiffuse + directionalAmbient;
   result += spotAmbient + spotDiffuse + spotSpecular;
   fragColor = vec4(result, 1.0);
+//  fragColor = vec4(vec3(gl_FragCoord.z), 1.0); // Default depth with non linear equation
+  float depth = LinearizeDepth(gl_FragCoord.z) / far; // divide by far for demonstration
+  fragColor = vec4(vec3(depth), 1.0);
+  fragColor = vec4(vec3((1.0-depth)*result), 1.0); // Reverse depth color
 }

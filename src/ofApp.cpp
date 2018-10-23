@@ -8,6 +8,11 @@ void ofApp::setup(){
   setupGUI();
   setup3dElements();
   setupShader();
+  
+  cam.setNearClip(0);
+  cam.setFarClip(50000);
+  cout << cam.getNearClip() << endl;
+  cout <<  cam.getFarClip() << endl;
 }
 
 void ofApp::setupShader(){
@@ -272,6 +277,8 @@ void ofApp::draw(){
   glFrontFace(GL_FRONT);
   
   shader.begin();
+  shader.setUniform1f("near", cam.getNearClip());
+  shader.setUniform1f("far", cam.getFarClip());
   shader.setUniform1i("useTextureMaterial", useTextureMaterial);
   shader.setUniformTexture("diffuseText", textureImage.getTexture() , 1);
   shader.setUniform3f("viewPos", cam.getGlobalPosition());
@@ -338,9 +345,8 @@ void ofApp::drawScene(){
   ofPushMatrix();
   ofTranslate(cubePos);
   ofRotateXDeg(cubeRotation);
-  //  cube.setPosition(cubePos);
-  shader.setUniformMatrix4f("model", sphere2.getGlobalTransformMatrix());
-  sphere2.getMesh().draw();
+  shader.setUniformMatrix4f("model", cube.getGlobalTransformMatrix());
+  cube.getMesh().draw();
   ofPopMatrix();
 }
 
