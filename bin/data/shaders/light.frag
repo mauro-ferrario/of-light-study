@@ -147,7 +147,7 @@ void main (void) {
     spotDiffuse = spotLight.diffuse * diffSpot * texture(textMaterial.diffuse, TexCoords).rgb;
     spotSpecular = spotLight.specular * specSpot * texture(textMaterial.specular, TexCoords).rgb;
   }
-  attenuation *= 0.14*1000000.0;
+  attenuation *= 1000000.0;
 //  attenuation *= sin(time*4.0)*1000000.0;
   ambient *= attenuation;
   diffuse *= attenuation;

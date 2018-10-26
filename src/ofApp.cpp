@@ -11,12 +11,11 @@ void ofApp::setup(){
   
   cam.setNearClip(0);
   cam.setFarClip(50000);
-  cout << cam.getNearClip() << endl;
-  cout <<  cam.getFarClip() << endl;
 }
 
 void ofApp::setupShader(){
   shader.load("shaders/light");
+  stencilShader.load("shaders/stencil");
 }
 
 void ofApp::setup3dElements(){
@@ -39,6 +38,10 @@ void ofApp::setupDefaultValues(){
   lightPos = ofVec3f(0.0, 0.0, 100.0);
   lightAmbientColor = ofColor(0);
   
+  bDrawStencil = false;
+  stencilBorderPerc = 1.01;
+  stencilBordercolor = ofColor(100);
+  
   directionalLightDirection = ofVec3f(0.4,0.4,0.3);
   directionalLightAmbientColor = ofColor(0);
   
@@ -59,6 +62,9 @@ void ofApp::setupDefaultValues(){
 void ofApp::setupGUI(){
   gui = new ofxDatGui( ofxDatGuiAnchor::TOP_LEFT );
   gui->addToggle("Enable cam interaction", enableCamInteraction);
+  gui->addToggle("Draw stencil", bDrawStencil);
+  gui->addSlider("Stencil border perc", 1.00, 2.00, stencilBorderPerc);
+  gui->addColorPicker("Stencil border color", stencilBordercolor);
   ofxDatGuiFolder* lightFolder = gui->addFolder("Point Light", ofColor::white);
   ofxDatGuiFolder* directionalLightFolder = gui->addFolder("Directional Light", ofColor::purple);
   ofxDatGuiFolder* spotLightFolder = gui->addFolder("Spot Light", ofColor::purple);
@@ -123,6 +129,9 @@ void ofApp::setupGUI(){
 void ofApp::onButtonEvent(ofxDatGuiButtonEvent e)
 {
   string label =  e.target->getLabel();
+  if(label == "Draw stencil"){
+    bDrawStencil = !bDrawStencil;
+  }
   if(label == "Use texture material"){
     useTextureMaterial = !useTextureMaterial;
   }
@@ -134,6 +143,10 @@ void ofApp::onButtonEvent(ofxDatGuiButtonEvent e)
 void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
 {
   string label =  e.target->getLabel();
+  
+  if(label == "Stencil border perc"){
+    stencilBorderPerc = e.target->getValue();
+  }
   
   // Point light
   if(label == "Light pos x"){
@@ -231,6 +244,11 @@ void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
 void ofApp::onColorEvent(ofxDatGuiColorPickerEvent e)
 {
   string label =  e.target->getLabel();
+  
+  if(label == "Stencil border color"){
+    stencilBordercolor = e.target->getColor();
+  }
+  
   if(label == "Light Ambient Color"){
     lightAmbientColor = e.target->getColor();
   }
@@ -329,10 +347,36 @@ void ofApp::endShader(){
 void ofApp::draw(){
   cam.begin();
   ofEnableDepthTest();
-  glFrontFace(GL_FRONT);
-  drawScene();
+  if(bDrawStencil){
+    drawStencil();
+  }
+  else{
+    drawScene(false);
+  }
   drawLights();
   ofDisableDepthTest();
+  cam.end();
+}
+
+void ofApp::drawStencil(){
+  cam.begin();
+  glEnable(GL_STENCIL_TEST);
+  glEnable(GL_DEPTH_TEST);
+  glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+  glStencilFunc(GL_ALWAYS, 1, 0xFF);
+  glStencilMask(0xff);
+  drawScene(false);
+  glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+  glStencilMask(0x00);
+  glDisable(GL_DEPTH_TEST);
+  stencilShader.begin();
+  stencilShader.setUniform3f("color", stencilBordercolor.r/255.0, stencilBordercolor.g/255.0, stencilBordercolor.b/255.0);
+  drawScene(true);
+  stencilShader.end();
+  glStencilMask(0xFF);
+  glEnable(GL_DEPTH_TEST);
+  glDisable(GL_STENCIL_TEST);
   cam.end();
 }
 
@@ -349,20 +393,39 @@ void ofApp::drawLights(){
   ofPopMatrix();
 }
 
-void ofApp::drawScene(){
+void ofApp::drawScene(bool drawStencil){
+  
   ofPushMatrix();
   ofTranslate(cubePos);
   ofRotateXDeg(cubeRotation);
-  beginShader(cube.getGlobalTransformMatrix());
+  if(drawStencil){
+    ofPushMatrix();
+    ofScale(ofVec3f(stencilBorderPerc));
+  }
+  if(!drawStencil)
+    beginShader(cube.getGlobalTransformMatrix());
   cube.getMesh().draw();
-  endShader();
+  if(drawStencil){
+    ofPopMatrix();
+  }
+  if(!drawStencil)
+    endShader();
   ofPopMatrix();
   
   ofPushMatrix();
   ofTranslate(5000.0,0,0);
-  beginShader(cube2.getGlobalTransformMatrix());
+  if(!drawStencil)
+    beginShader(cube2.getGlobalTransformMatrix());
+  if(drawStencil){
+    ofPushMatrix();
+    ofScale(ofVec3f(stencilBorderPerc));
+  }
   cube2.getMesh().draw();
-  endShader();
+  if(drawStencil){
+    ofPopMatrix();
+  }
+  if(!drawStencil)
+    endShader();
   ofPopMatrix();
 }
 

@@ -24,8 +24,8 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
   
     ofxAutoReloadedShader shader;
-//    ofShader              shader;
-    void                  drawScene();
+    ofxAutoReloadedShader stencilShader;
+    void                  drawScene(bool drawStencil = true);
     void                  drawLights();
     void                  onButtonEvent(ofxDatGuiButtonEvent e);
     void                  onSliderEvent(ofxDatGuiSliderEvent e);
@@ -38,6 +38,7 @@ class ofApp : public ofBaseApp{
     void                  setup3dElements();
     void                  beginShader(glm::mat4 modelMatrix);
     void                  endShader();
+    void                  drawStencil();
   
     ofBoxPrimitive        cube;
     ofBoxPrimitive        cube2;
@@ -49,6 +50,9 @@ class ofApp : public ofBaseApp{
     ofxDatGui*            gui;
     bool                  useTextureMaterial;
     bool                  enableCamInteraction;
+    bool                  bDrawStencil;
+    float                 stencilBorderPerc;
+    ofColor               stencilBordercolor;
 
     ofVec3f               lightPos;
     ofVec3f               cubePos;
