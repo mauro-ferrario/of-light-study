@@ -8,9 +8,68 @@ void ofApp::setup(){
   setupGUI();
   setup3dElements();
   setupShader();
+  setupCubeMaps();
+  cam.setNearClip(.01);
+  cam.setFarClip(100000);
+}
+
+void ofApp::setupCubeMaps(){
+  ofDisableArbTex();
+  skyCubeBox   = ofMesh::box(1000,1000,1000,1,1,1);
+  sizeVboSkyMesh= skyCubeBox.getNumIndices();
+  //vboSky.setMesh(skyCubeBox, GL_STATIC_DRAW);
   
-  cam.setNearClip(0);
-  cam.setFarClip(50000);
+  cubemapShader.load("shaders/skyCubemaps");
+  loadCubeMapsImages();
+  setupCubeMapsFaces();
+}
+
+void ofApp::setupCubeMapsFaces(){
+  glDeleteTextures(1, &CubeMaptexture);
+  
+  glGenTextures(1, &CubeMaptexture);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, CubeMaptexture);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+  
+  ofPixels back, front,up,down,left,right;
+  back = cubeMapsImages[0].getPixels();
+  front = cubeMapsImages[1].getPixels();
+  up = cubeMapsImages[2].getPixels();
+  down = cubeMapsImages[3].getPixels();
+  left = cubeMapsImages[4].getPixels();
+  right = cubeMapsImages[5].getPixels();
+  int size = front.getWidth();
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, back.getData());
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, front.getData());
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, up.getData());
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, down.getData());
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, left.getData());
+  glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, size, size, 0, GL_RGB, GL_UNSIGNED_BYTE, right.getData());
+}
+
+void ofApp::loadCubeMapsImages(){
+  ofImage back;
+  ofImage front;
+  ofImage up;
+  ofImage down;
+  ofImage left;
+  ofImage right;
+  back.load("cubemaps/violentdays_bk.jpg");
+  front.load("cubemaps/violentdays_ft.jpg");
+  up.load("cubemaps/violentdays_up.jpg");
+  down.load("cubemaps/violentdays_dn.jpg");
+  left.load("cubemaps/violentdays_lf.jpg");
+  right.load("cubemaps/violentdays_rt.jpg");
+  cubeMapsImages.push_back(back);
+  cubeMapsImages.push_back(front);
+  cubeMapsImages.push_back(up);
+  cubeMapsImages.push_back(down);
+  cubeMapsImages.push_back(left);
+  cubeMapsImages.push_back(right);
 }
 
 void ofApp::setupShader(){
@@ -37,6 +96,8 @@ void ofApp::setupDefaultValues(){
   enableCamInteraction = true;
   lightPos = ofVec3f(0.0, 0.0, 100.0);
   lightAmbientColor = ofColor(0);
+  
+  bDrawSkyCubemaps = true;
   
   bDrawStencil = false;
   stencilBorderPerc = 1.01;
@@ -347,19 +408,39 @@ void ofApp::endShader(){
 void ofApp::draw(){
   cam.begin();
   ofEnableDepthTest();
-  if(bDrawStencil){
-    drawStencil();
-  }
-  else{
-    drawScene(false);
-  }
+  glEnable(GL_CULL_FACE);
+//  if(bDrawStencil){
+//    drawStencil();
+//  }
+//  else if(bDrawSkyCubemaps){
+//    cout << "in 1" << endl;
+//    drawSkyCubemaps();
+//  }
+//  else{
+//    cout << "in 2" << endl;
+//    drawScene(false);
+//  }
+  drawSkyCubemaps();
   drawLights();
+  glDisable(GL_CULL_FACE);
   ofDisableDepthTest();
   cam.end();
 }
 
+void ofApp::drawSkyCubemaps(){
+  glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+  cubemapShader.begin();
+  cubemapShader.setUniform1i("skybox", 0);
+  cubemapShader.setUniformMatrix4f("model", cube.getGlobalTransformMatrix());
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, CubeMaptexture);
+  skyCubeBox.drawFaces();
+  //  vboSky.drawElements(GL_TRIANGLES, sizeVboSkyMesh);
+  glDepthFunc(GL_LESS); // set depth function back to default
+  cubemapShader.end();
+}
+
 void ofApp::drawStencil(){
-  cam.begin();
   glEnable(GL_STENCIL_TEST);
   glEnable(GL_DEPTH_TEST);
   glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
@@ -377,7 +458,6 @@ void ofApp::drawStencil(){
   glStencilMask(0xFF);
   glEnable(GL_DEPTH_TEST);
   glDisable(GL_STENCIL_TEST);
-  cam.end();
 }
 
 void ofApp::drawLights(){
@@ -394,7 +474,6 @@ void ofApp::drawLights(){
 }
 
 void ofApp::drawScene(bool drawStencil){
-  
   ofPushMatrix();
   ofTranslate(cubePos);
   ofRotateXDeg(cubeRotation);

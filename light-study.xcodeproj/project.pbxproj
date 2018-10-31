@@ -65,6 +65,8 @@
 		A974A252217F2A5300BF7535 /* light.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.frag; sourceTree = "<group>"; };
 		A974A254217F8EC800BF7535 /* stencil.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = stencil.vert; sourceTree = "<group>"; };
 		A974A255217F8EC800BF7535 /* stencil.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = stencil.frag; sourceTree = "<group>"; };
+		A9D1BFB22188A80700FB4E22 /* skyCubemaps.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = skyCubemaps.vert; sourceTree = "<group>"; };
+		A9D1BFB32188A80800FB4E22 /* skyCubemaps.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = skyCubemaps.frag; sourceTree = "<group>"; };
 		B498F0559F473CF855EF6062 /* ofxDatGuiTheme.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxDatGuiTheme.h; path = ../../../addons/ofxDatGui/src/themes/ofxDatGuiTheme.h; sourceTree = SOURCE_ROOT; };
 		BCC84C6EB3417706F4F762F0 /* ofxDatGuiComponent.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxDatGuiComponent.h; path = ../../../addons/ofxDatGui/src/core/ofxDatGuiComponent.h; sourceTree = SOURCE_ROOT; };
 		C085A33340AB0C1DB647AC2F /* ofxDatGuiTextInput.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxDatGuiTextInput.h; path = ../../../addons/ofxDatGui/src/components/ofxDatGuiTextInput.h; sourceTree = SOURCE_ROOT; };
@@ -185,6 +187,8 @@
 			children = (
 				A974A255217F8EC800BF7535 /* stencil.frag */,
 				A974A254217F8EC800BF7535 /* stencil.vert */,
+				A9D1BFB32188A80800FB4E22 /* skyCubemaps.frag */,
+				A9D1BFB22188A80700FB4E22 /* skyCubemaps.vert */,
 				A974A251217F2A5300BF7535 /* light.vert */,
 				A974A252217F2A5300BF7535 /* light.frag */,
 			);

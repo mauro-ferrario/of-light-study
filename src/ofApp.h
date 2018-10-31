@@ -25,6 +25,7 @@ class ofApp : public ofBaseApp{
   
     ofxAutoReloadedShader shader;
     ofxAutoReloadedShader stencilShader;
+    ofxAutoReloadedShader cubemapShader;
     void                  drawScene(bool drawStencil = true);
     void                  drawLights();
     void                  onButtonEvent(ofxDatGuiButtonEvent e);
@@ -39,6 +40,17 @@ class ofApp : public ofBaseApp{
     void                  beginShader(glm::mat4 modelMatrix);
     void                  endShader();
     void                  drawStencil();
+    void                  loadCubeMapsImages();
+    void                  setupCubeMaps();
+    void                  setupCubeMapsFaces();
+  
+    unsigned int          CubeMaptexture;
+    vector<ofImage>       cubeMapsImages;
+    int                   sizeVboSkyMesh;
+    ofMesh                skyCubeBox;
+    ofVbo                 vboSky;
+    void                  drawSkyCubemaps();
+    bool                  bDrawSkyCubemaps;
   
     ofBoxPrimitive        cube;
     ofBoxPrimitive        cube2;
