@@ -15,7 +15,7 @@ void ofApp::setup(){
 
 void ofApp::setupCubeMaps(){
   ofDisableArbTex();
-  skyCubeBox   = ofMesh::box(1000,1000,1000,1,1,1);
+  skyCubeBox   = ofMesh::box(100000,100000,100000,1,1,1);
   sizeVboSkyMesh= skyCubeBox.getNumIndices();
   //vboSky.setMesh(skyCubeBox, GL_STATIC_DRAW);
   
@@ -515,6 +515,9 @@ void ofApp::keyPressed(int key){
 
 //--------------------------------------------------------------
 void ofApp::keyReleased(int key){
+  if(key == 'f'){
+    ofToggleFullscreen();
+  }
 
 }
 
