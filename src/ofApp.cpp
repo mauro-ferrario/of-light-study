@@ -9,6 +9,9 @@ void ofApp::setup(){
   setup3dElements();
   setupShader();
   setupCubeMaps();
+  
+  reflectionShader.load("shaders/reflection");
+  
   cam.setNearClip(.01);
   cam.setFarClip(100000);
 }
@@ -79,9 +82,9 @@ void ofApp::setupShader(){
 
 void ofApp::setup3dElements(){
   light.set(10, 10, 10);
-  cube.set(1000, 1000, 1000, 10,10,10);
-  cube2.set(1000, 1000, 1000, 10,10,10);
-  sphere2.set(1000, 10);
+  cube.set(1000, 1000, 1000, 1,1,1);
+  cube2.set(1000, 1000, 1000, 1,1,1);
+  sphere2.set(1000, 100);
 }
 
 void ofApp::setupTextures(){
@@ -92,6 +95,8 @@ void ofApp::setupTextures(){
 }
 
 void ofApp::setupDefaultValues(){
+  bUseRefraction = false;
+  
   useTextureMaterial = true;
   enableCamInteraction = true;
   lightPos = ofVec3f(0.0, 0.0, 100.0);
@@ -122,8 +127,11 @@ void ofApp::setupDefaultValues(){
 
 void ofApp::setupGUI(){
   gui = new ofxDatGui( ofxDatGuiAnchor::TOP_LEFT );
+  gui->addSlider("Camera near clip", 0.0001, 1.00, 0.01);
+  gui->addSlider("Camera far clip", 100.00, 100000, 100000);
   gui->addToggle("Enable cam interaction", enableCamInteraction);
   gui->addToggle("Draw stencil", bDrawStencil);
+  gui->addToggle("Draw cubemaps", bDrawSkyCubemaps);
   gui->addSlider("Stencil border perc", 1.00, 2.00, stencilBorderPerc);
   gui->addColorPicker("Stencil border color", stencilBordercolor);
   ofxDatGuiFolder* lightFolder = gui->addFolder("Point Light", ofColor::white);
@@ -131,6 +139,8 @@ void ofApp::setupGUI(){
   ofxDatGuiFolder* spotLightFolder = gui->addFolder("Spot Light", ofColor::purple);
   ofxDatGuiFolder* textureFolder = gui->addFolder("Texture", ofColor::blue);
   ofxDatGuiFolder* meshFolder = gui->addFolder("Mesh", ofColor::red);
+  ofxDatGuiFolder* cubeMapsFolder = gui->addFolder("Cubemaps", ofColor::red);
+  
   
   // Light
   lightFolder->addSlider("Light pos x", -6000, 6000, 0);
@@ -182,6 +192,10 @@ void ofApp::setupGUI(){
   meshFolder->addSlider("Cube pos z", -6000, 6000, 0);
   meshFolder->addSlider("Cube rotation", 0, 360, 0);
   
+  // Cube maps
+  
+  cubeMapsFolder->addToggle("Use refraction");
+  
   gui->onButtonEvent(this, &ofApp::onButtonEvent);
   gui->onSliderEvent(this, &ofApp::onSliderEvent);
   gui->onColorPickerEvent(this, &ofApp::onColorEvent);
@@ -193,17 +207,35 @@ void ofApp::onButtonEvent(ofxDatGuiButtonEvent e)
   if(label == "Draw stencil"){
     bDrawStencil = !bDrawStencil;
   }
+  
+  if(label == "Draw cubemaps"){
+    bDrawSkyCubemaps = !bDrawSkyCubemaps;
+  }
+  
   if(label == "Use texture material"){
     useTextureMaterial = !useTextureMaterial;
   }
   if(label == "Enable cam interaction"){
     enableCamInteraction = !enableCamInteraction;
   }
+  
+  if(label == "Use refraction"){
+    bUseRefraction = !bUseRefraction;
+  }
 }
 
 void ofApp::onSliderEvent(ofxDatGuiSliderEvent e)
 {
   string label =  e.target->getLabel();
+
+  
+  if(label == "Camera near clip"){
+    cam.setNearClip(e.target->getValue());
+  }
+                    
+  if(label == "Camera far clip"){
+    cam.setFarClip(e.target->getValue());
+  }
   
   if(label == "Stencil border perc"){
     stencilBorderPerc = e.target->getValue();
@@ -408,26 +440,48 @@ void ofApp::endShader(){
 void ofApp::draw(){
   cam.begin();
   ofEnableDepthTest();
-  glEnable(GL_CULL_FACE);
-//  if(bDrawStencil){
-//    drawStencil();
-//  }
-//  else if(bDrawSkyCubemaps){
-//    cout << "in 1" << endl;
-//    drawSkyCubemaps();
-//  }
-//  else{
-//    cout << "in 2" << endl;
-//    drawScene(false);
-//  }
-  drawSkyCubemaps();
+  if(bDrawStencil){
+    drawStencil();
+  }
+  else if(bDrawSkyCubemaps){
+    drawSkyCubemaps();
+  }
+  else{
+    drawScene(false);
+  }
   drawLights();
-  glDisable(GL_CULL_FACE);
   ofDisableDepthTest();
   cam.end();
 }
 
 void ofApp::drawSkyCubemaps(){
+  
+  ofPushMatrix();
+  ofTranslate(cubePos);
+  ofRotateXDeg(cubeRotation);
+  reflectionShader.begin();
+  reflectionShader.setUniformMatrix4f("model", cube.getGlobalTransformMatrix());
+  reflectionShader.setUniform3f("cameraPos", cam.getPosition());
+  reflectionShader.setUniform1i("useRefraction", bUseRefraction);
+  
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_CUBE_MAP, CubeMaptexture);
+  glDrawArrays(GL_TRIANGLES, 0, 36);
+  cube.getMesh().draw();
+  reflectionShader.end();
+  ofPopMatrix();
+  
+  ofPushMatrix();
+  ofTranslate(5000.0,0,0);
+  reflectionShader.begin();
+  reflectionShader.setUniformMatrix4f("model", cube2.getGlobalTransformMatrix());
+  reflectionShader.setUniform3f("cameraPos", cam.getPosition());
+  reflectionShader.setUniform1i("useRefraction", bUseRefraction);
+  sphere2.getMesh().drawFaces();
+  reflectionShader.end();
+  ofPopMatrix();
+  
+  glEnable(GL_CULL_FACE);
   glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
   cubemapShader.begin();
   cubemapShader.setUniform1i("skybox", 0);
@@ -437,6 +491,7 @@ void ofApp::drawSkyCubemaps(){
   skyCubeBox.drawFaces();
   //  vboSky.drawElements(GL_TRIANGLES, sizeVboSkyMesh);
   glDepthFunc(GL_LESS); // set depth function back to default
+  glDisable(GL_CULL_FACE);
   cubemapShader.end();
 }
 

@@ -61,6 +61,8 @@
 		902724601B82C6AD81BBCD71 /* ofxDatGui2dPad.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxDatGui2dPad.h; path = ../../../addons/ofxDatGui/src/components/ofxDatGui2dPad.h; sourceTree = SOURCE_ROOT; };
 		9705D66270ED89ECA6E6FECE /* ofxDatGui.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxDatGui.h; path = ../../../addons/ofxDatGui/src/ofxDatGui.h; sourceTree = SOURCE_ROOT; };
 		9B5051062C6A871714E6F5F4 /* ofxDatGuiConstants.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = ofxDatGuiConstants.h; path = ../../../addons/ofxDatGui/src/core/ofxDatGuiConstants.h; sourceTree = SOURCE_ROOT; };
+		A900BB022189DDA9007B774D /* reflection.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = reflection.frag; sourceTree = "<group>"; };
+		A900BB032189DDA9007B774D /* reflection.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = reflection.vert; sourceTree = "<group>"; };
 		A974A251217F2A5300BF7535 /* light.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.vert; sourceTree = "<group>"; };
 		A974A252217F2A5300BF7535 /* light.frag */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = light.frag; sourceTree = "<group>"; };
 		A974A254217F8EC800BF7535 /* stencil.vert */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.glsl; path = stencil.vert; sourceTree = "<group>"; };
@@ -185,6 +187,8 @@
 		A974A250217F2A5300BF7535 /* shaders */ = {
 			isa = PBXGroup;
 			children = (
+				A900BB022189DDA9007B774D /* reflection.frag */,
+				A900BB032189DDA9007B774D /* reflection.vert */,
 				A974A255217F8EC800BF7535 /* stencil.frag */,
 				A974A254217F8EC800BF7535 /* stencil.vert */,
 				A9D1BFB32188A80800FB4E22 /* skyCubemaps.frag */,

@@ -26,6 +26,7 @@ class ofApp : public ofBaseApp{
     ofxAutoReloadedShader shader;
     ofxAutoReloadedShader stencilShader;
     ofxAutoReloadedShader cubemapShader;
+    ofxAutoReloadedShader reflectionShader;
     void                  drawScene(bool drawStencil = true);
     void                  drawLights();
     void                  onButtonEvent(ofxDatGuiButtonEvent e);
@@ -51,6 +52,8 @@ class ofApp : public ofBaseApp{
     ofVbo                 vboSky;
     void                  drawSkyCubemaps();
     bool                  bDrawSkyCubemaps;
+  
+    bool                  bUseRefraction;
   
     ofBoxPrimitive        cube;
     ofBoxPrimitive        cube2;
